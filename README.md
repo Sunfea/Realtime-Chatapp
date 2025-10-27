@@ -1,4 +1,5 @@
 💬 ChatApp - Real-time Messenger
+
 A modern chat application with real-time messaging, file sharing, and secure authentication.
 
 🚀 Features

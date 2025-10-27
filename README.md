@@ -1,77 +1,55 @@
-💬 ChatApp - Real-time Messenger
+# 💬 ChatApp - Real-time Messenger
 
-A modern chat application with real-time messaging, file sharing, and secure authentication.
+A modern chat application offering real-time messaging, secure authentication, and seamless file sharing. Built with FastAPI and vanilla JavaScript for speed, simplicity, and scalability.
 
-🚀 Features
-💬 Real-time Chat
-Instant messaging with WebSockets
+---
 
-Typing indicators & read receipts
+## 🚀 Features
 
-One-on-one private chats
+### 💬 Real-time Chat
+- Instant messaging powered by WebSockets
+- Typing indicators and read receipts
+- One-on-one private conversations
+- Persistent chat history
 
-Persistent chat history
+### 🔐 Security
+- JWT-based authentication
+- Password encryption
+- CORS protection
+- Secure file uploads
 
-🔐 Security
-JWT authentication
+### 📱 User Experience
+- Responsive design for mobile and desktop
+- Clean, modern UI
+- User search and profile viewing
+- Drag & drop file sharing
 
-Password encryption
+### 📁 File Sharing
+- Support for multiple file types
+- 10MB upload limit
+- Secure server-side storage
+- Easy file downloads
 
-CORS protection
+---
 
-Secure file uploads
+## 🛠 Tech Stack
 
-📱 User Experience
-Responsive design (mobile & desktop)
+### Backend
+- **FastAPI** – High-performance Python web framework
+- **SQLAlchemy** – ORM for database interactions
+- **SQLite / PostgreSQL** – Flexible database options
+- **JWT** – Secure authentication
+- **WebSockets** – Real-time communication
+- **Pydantic** – Data validation and serialization
 
-Modern, clean UI
+### Frontend
+- **Vanilla JavaScript** – Lightweight and framework-free
+- **HTML5** – Semantic markup
+- **CSS3** – Modern styling with variables
+- **Fetch API** – RESTful HTTP requests
+- **WebSocket API** – Live updates and messaging
 
-User search & profiles
+---
 
-Drag & drop file sharing
+## 🏗 Project Structure
 
-📁 File Sharing
-Multiple file type support
-
-10MB size limit
-
-Secure storage
-
-Easy downloads
-
-🛠 Tech Stack
-Backend
-FastAPI - Modern Python web framework
-
-SQLAlchemy - Database ORM
-
-SQLite/PostgreSQL - Database
-
-JWT - Authentication
-
-WebSockets - Real-time communication
-
-Pydantic - Data validation
-
-Frontend
-Vanilla JavaScript - No framework dependencies
-
-CSS3 - Modern styling with variables
-
-HTML5 - Semantic markup
-
-Fetch API - HTTP requests
-
-WebSocket API - Real-time updates
-
-🏗 Architecture
-text
-chatapp/
-├── backend/          # FastAPI + Python
-│   ├── routers/     # API routes
-│   ├── models.py    # Database models
-│   └── main.py      # App entry point
-└── frontend/        # Vanilla JS
-    ├── index.html   # Single page app
-    ├── css/         # Styling
-    └── js/          # Application logic

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatApp - Modern Messaging</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Auth Screens -->
+    <div id="auth-screen" class="screen active">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h1><i class="fas fa-comments"></i> ChatApp</h1>
+                <p>Connect with friends instantly</p>
+            </div>
+            
+            <div class="auth-tabs">
+                <button class="tab-btn active" data-tab="login">Login</button>
+                <button class="tab-btn" data-tab="register">Register</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form active">
+                <div class="form-group">
+                    <input type="text" id="login-username" placeholder="Username" required>
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="login-password" placeholder="Password" required>
+                    <i class="fas fa-lock"></i>
+                </div>
+                <button type="submit" class="btn-primary">
+                    <span class="btn-text">Sign In</span>
+                    <div class="btn-loader hidden">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                </button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="register-form" class="auth-form">
+                <div class="form-group">
+                    <input type="text" id="register-fullname" placeholder="Full Name" required>
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="register-username" placeholder="Username" required>
+                    <i class="fas fa-at"></i>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="register-email" placeholder="Email" required>
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="register-password" placeholder="Password" required>
+                    <i class="fas fa-lock"></i>
+                </div>
+                <button type="submit" class="btn-primary">
+                    <span class="btn-text">Create Account</span>
+                    <div class="btn-loader hidden">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Chat App -->
+    <div id="chat-app" class="screen">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-info">
+                    <img src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff" 
+                         alt="Profile" class="user-avatar" id="user-avatar">
+                    <div class="user-details">
+                        <span class="user-name" id="user-name">User</span>
+                        <span class="user-status">Online</span>
+                    </div>
+                </div>
+                <button class="icon-btn" id="logout-btn" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+
+            <!-- Search and New Chat -->
+            <div class="search-section">
+                <div class="search-container">
+                    <input type="text" id="user-search" placeholder="Search users...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <button class="icon-btn new-chat-btn" id="new-chat-btn" title="New Chat">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+
+            <!-- Chats List -->
+            <div class="chats-list" id="chats-list">
+                <!-- Chats will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <!-- Welcome Screen -->
+            <div class="welcome-screen" id="welcome-screen">
+                <div class="welcome-content">
+                    <i class="fas fa-comments"></i>
+                    <h2>Welcome to ChatApp</h2>
+                    <p>Select a chat or start a new conversation</p>
+                </div>
+            </div>
+
+            <!-- Active Chat -->
+            <div class="active-chat hidden" id="active-chat">
+                <!-- Chat Header -->
+                <div class="chat-header">
+                    <div class="chat-partner-info">
+                        <img src="https://ui-avatars.com/api/?name=Friend&background=10b981&color=fff" 
+                             alt="Friend" class="partner-avatar" id="partner-avatar">
+                        <div class="partner-details">
+                            <span class="partner-name" id="partner-name">Friend</span>
+                            <span class="partner-status" id="partner-status">Online</span>
+                        </div>
+                    </div>
+                    <div class="chat-actions">
+                        <button class="icon-btn" id="files-btn" title="Files">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        <button class="icon-btn" id="call-btn" title="Voice Call">
+                            <i class="fas fa-phone"></i>
+                        </button>
+                        <button class="icon-btn" id="video-btn" title="Video Call">
+                            <i class="fas fa-video"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Messages Container -->
+                <div class="messages-container" id="messages-container">
+                    <!-- Messages will be loaded here -->
+                </div>
+
+                <!-- Typing Indicator -->
+                <div class="typing-indicator hidden" id="typing-indicator">
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <span>is typing...</span>
+                </div>
+
+                <!-- Message Input -->
+                <div class="message-input-container">
+                    <button class="icon-btn attachment-btn" id="attachment-btn">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    <div class="input-wrapper">
+                        <input type="text" id="message-input" placeholder="Type a message..." maxlength="1000">
+                        <div class="input-actions">
+                            <button class="icon-btn emoji-btn" id="emoji-btn">
+                                <i class="fas fa-smile"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="icon-btn send-btn" id="send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Files Panel -->
+        <div class="files-panel hidden" id="files-panel">
+            <div class="panel-header">
+                <h3>Shared Files</h3>
+                <button class="icon-btn close-panel" id="close-files-panel">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="files-list" id="files-list">
+                <!-- Files will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- File Upload Modal -->
+    <div class="modal hidden" id="file-upload-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Upload File</h3>
+                <button class="icon-btn close-modal" id="close-upload-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="file" id="file-input" class="hidden">
+                <div class="upload-area" id="upload-area">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Click to select a file or drag and drop</p>
+                    <span>Max file size: 10MB</span>
+                </div>
+                <div class="file-preview hidden" id="file-preview">
+                    <i class="fas fa-file"></i>
+                    <div class="file-info">
+                        <span class="file-name" id="preview-file-name"></span>
+                        <span class="file-size" id="preview-file-size"></span>
+                    </div>
+                    <button class="icon-btn remove-file" id="remove-file">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancel-upload">Cancel</button>
+                <button class="btn-primary" id="confirm-upload" disabled>Upload</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loading-overlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/websocket.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/ui.js"></script>
+</body>
+</html>

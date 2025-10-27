@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - ChatApp</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="auth-body">
+    <div class="auth-container">
+        <!-- Back Button -->
+        <a href="/" class="back-btn">
+            ← Back
+        </a>
+
+        <!-- Register Form -->
+        <div class="glass-form-container">
+            <div class="form-header">
+                <div class="logo-icon">🚀</div>
+                <h2>Join ChatApp</h2>
+                <p>Create your account to get started</p>
+            </div>
+
+            <form id="registerForm" class="glass-form">
+                <div class="input-group">
+                    <input type="text" id="fullName" required>
+                    <label for="fullName">Full Name</label>
+                    <span class="input-border"></span>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" id="username" required>
+                    <label for="username">Username</label>
+                    <span class="input-border"></span>
+                    <small class="input-hint">3-20 characters, letters and numbers only</small>
+                </div>
+
+                <div class="input-group">
+                    <input type="email" id="email" required>
+                    <label for="email">Email</label>
+                    <span class="input-border"></span>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" id="password" required>
+                    <label for="password">Password</label>
+                    <span class="input-border"></span>
+                </div>
+
+                <button type="submit" class="btn-glass primary full-width">
+                    <span class="btn-text">Create Account</span>
+                    <div class="btn-loader hidden"></div>
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Already have an account? <a href="login.html" class="auth-link">Sign in</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+</body>
+</html>

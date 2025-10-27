@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chats - ChatApp</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="chat-body">
+    <!-- Main Chat Container -->
+    <div class="chat-app-container">
+        <!-- Sidebar -->
+        <div class="sidebar glass-sidebar">
+            <!-- User Header -->
+            <div class="user-header">
+                <div class="user-avatar">
+                    <span>👤</span>
+                </div>
+                <div class="user-info">
+                    <h3 id="currentUserName">Loading...</h3>
+                    <p class="user-status">Online</p>
+                </div>
+                <button class="icon-btn" onclick="AuthService.logout()" title="Logout">
+                    🚪
+                </button>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" id="userSearch" placeholder="Search users...">
+                    <span class="search-icon">🔍</span>
+                </div>
+                <div id="searchResults" class="search-results hidden"></div>
+            </div>
+
+            <!-- Chats List -->
+            <div class="chats-section">
+                <div class="section-header">
+                    <h4>Messages</h4>
+                    <span id="unreadBadge" class="unread-badge hidden">0</span>
+                </div>
+                <div id="chatsList" class="chats-list">
+                    <!-- Chats will be loaded here -->
+                    <div class="loading-chats">Loading conversations...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="chat-main">
+            <!-- Welcome/Empty State -->
+            <div id="welcomeScreen" class="welcome-screen">
+                <div class="welcome-content">
+                    <div class="welcome-icon">💬</div>
+                    <h2>Welcome to ChatApp</h2>
+                    <p>Select a conversation or search for users to start chatting</p>
+                </div>
+            </div>
+
+            <!-- Active Chat (Hidden by default) -->
+            <div id="activeChat" class="active-chat hidden">
+                <!-- Chat Header -->
+                <div class="chat-header glass-header">
+                    <button class="back-btn mobile-only" onclick="hideActiveChat()">←</button>
+                    <div class="chat-partner-info">
+                        <div class="partner-avatar">
+                            <span>👤</span>
+                        </div>
+                        <div class="partner-details">
+                            <h4 id="partnerName">User Name</h4>
+                            <p id="partnerStatus" class="partner-status">Online</p>
+                        </div>
+                    </div>
+                    <div class="chat-actions">
+                        <button class="icon-btn" onclick="toggleFileUpload()" title="Attach file">
+                            📎
+                        </button>
+                    </div>
+                </div>
+
+                <!-- File Upload Dropdown -->
+                <div id="fileUploadDropdown" class="file-upload-dropdown hidden">
+                    <input type="file" id="fileInput" class="hidden" accept="*/*">
+                    <button class="dropdown-item" onclick="triggerFileUpload()">
+                        📁 Upload File
+                    </button>
+                </div>
+
+                <!-- Messages Container -->
+                <div id="messagesContainer" class="messages-container">
+                    <!-- Messages will appear here -->
+                    <div class="empty-chat">
+                        <p>No messages yet. Start the conversation!</p>
+                    </div>
+                </div>
+
+                <!-- Message Input -->
+                <div class="message-input-container">
+                    <div class="input-wrapper">
+                        <input 
+                            type="text" 
+                            id="messageInput" 
+                            placeholder="Type a message..." 
+                            onkeypress="handleMessageKeypress(event)"
+                        >
+                        <button class="send-btn" onclick="sendMessage()">
+                            <span class="send-icon">↑</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/chat.js"></script>
+    <script src="../js/websocket.js"></script>
+</body>
+</html>

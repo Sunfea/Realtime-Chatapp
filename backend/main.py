@@ -4,20 +4,32 @@ import models
 from routers import auth, users, chats
 from fastapi.middleware.cors import CORSMiddleware
 from routers import files
+from config import settings
 
 
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Chat App")
+app = FastAPI(
+    title="Chat App API",
+    description="Real-time Chat Application", 
+    version="1.0.0",
+    docs_url="/docs" if settings.environment == "development" else None,
+    redoc_url=None
+)
 
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000", 
+        "http://localhost:3001",
+        "http://127.0.0.1:3001",
+    ],  # ✅ HARDCODE THE LIST HERE
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Include routers
@@ -92,3 +104,12 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int):
         manager.disconnect(user_id)
         print(f"User {user_id} disconnected from WebSocket")
         
+
+# In main.py - Add temporary test endpoint
+@app.options("/auth/login")
+async def options_login():
+    return {"message": "OPTIONS allowed"}
+
+@app.get("/test-cors")
+async def test_cors():
+    return {"message": "CORS is working!"}

@@ -1,3 +1,5 @@
-uploads
-__pycache__
+uploads/
+__pycache__/
 chat_app.db
+*.env
+*.pyc

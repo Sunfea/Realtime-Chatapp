@@ -8,19 +8,13 @@ class ChatManager {
 
     init() {
         this.bindEvents();
-        // Only load chats if user is authenticated
-        const user = authManager.getCurrentUser();
-        if (user && user.id) {
-            this.loadChats();
-        }
     }
-
+    
     initializeForUser() {
         this.loadChats();
     }
 
     bindEvents() {
-        // Message input
         const messageInput = document.getElementById('message-input');
         const sendBtn = document.getElementById('send-btn');
 
@@ -34,12 +28,10 @@ class ChatManager {
 
         sendBtn.addEventListener('click', () => this.sendMessage());
 
-        // File upload
         document.getElementById('attachment-btn').addEventListener('click', () => {
             ui.showFileUploadModal();
         });
 
-        // User search
         const userSearch = document.getElementById('user-search');
         let searchTimeout;
         
@@ -50,13 +42,11 @@ class ChatManager {
             }, 300);
         });
 
-        // New chat button
         document.getElementById('new-chat-btn').addEventListener('click', () => {
             userSearch.value = '';
             userSearch.focus();
         });
 
-        // Files panel
         document.getElementById('files-btn').addEventListener('click', () => {
             this.toggleFilesPanel();
         });
@@ -120,30 +110,30 @@ class ChatManager {
     async selectChat(chat) {
         this.currentChat = chat;
         
-        // Update UI
         document.querySelectorAll('.chat-item').forEach(item => {
             item.classList.remove('active');
         });
-        event.currentTarget.classList.add('active');
+        
+        const chatItems = document.querySelectorAll('.chat-item');
+        chatItems.forEach(item => {
+            const chatPartner = item.querySelector('.chat-partner');
+            if (chatPartner && chatPartner.textContent === chat.other_user.full_name) {
+                item.classList.add('active');
+            }
+        });
 
-        // Show chat area
         document.getElementById('welcome-screen').classList.add('hidden');
         document.getElementById('active-chat').classList.remove('hidden');
 
-        // Update chat header
         this.updateChatHeader(chat);
 
-        // Join WebSocket room
         websocketManager.joinChat(chat.id);
 
-        // Load messages
         await this.loadMessages(chat.id);
 
-        // Load files
         await this.loadFiles(chat.id);
 
-        // Mark messages as read
-        this.markMessagesAsRead();
+        this.closeSearchResults();
     }
 
     updateChatHeader(chat) {
@@ -169,7 +159,6 @@ class ChatManager {
             this.appendMessage(message);
         });
 
-        // Scroll to bottom
         this.scrollToBottom();
     }
 
@@ -199,37 +188,29 @@ class ChatManager {
         if (!content || !this.currentChat) return;
 
         try {
-            // Clear input immediately for better UX
             input.value = '';
 
-            // Send message
             const message = await api.sendMessage(this.currentChat.id, content);
             
-            // Add message to UI
             this.appendMessage(message);
             this.scrollToBottom();
 
-            // Stop typing indicator
             this.stopTyping();
 
         } catch (error) {
             ui.showToast('Failed to send message', 'error');
-            // Restore message if failed
             input.value = content;
         }
     }
 
     handleNewMessage(message, chatId) {
-        // If this is for the current chat, add it
         if (this.currentChat && this.currentChat.id === chatId) {
             this.appendMessage(message);
             this.scrollToBottom();
             
-            // Mark as read
             this.markMessagesAsRead([message.id]);
         }
 
-        // Update chats list
         this.loadChats();
     }
 
@@ -242,7 +223,6 @@ class ChatManager {
             this.typingUsers.set(userId, true);
             typingIndicator.classList.remove('hidden');
             
-            // Update text to show who's typing
             const user = this.currentChat.other_user;
             typingIndicator.querySelector('span:last-child').textContent = `${user.full_name} is typing...`;
         } else {
@@ -256,13 +236,10 @@ class ChatManager {
     handleTyping() {
         if (!this.currentChat) return;
 
-        // Send typing start
         websocketManager.sendTypingIndicator(this.currentChat.id, true);
 
-        // Clear existing timeout
         clearTimeout(this.typingTimeout);
 
-        // Set timeout to stop typing indicator
         this.typingTimeout = setTimeout(() => {
             this.stopTyping();
         }, 1000);
@@ -277,7 +254,7 @@ class ChatManager {
 
     async searchUsers(query) {
         if (!query.trim()) {
-            // Clear search results
+            this.renderChatsList();
             return;
         }
 
@@ -290,105 +267,98 @@ class ChatManager {
     }
 
     showSearchResults(users) {
-    const chatsList = document.getElementById('chats-list');
-    
-    if (users.length === 0) {
-        chatsList.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-search"></i>
-                <p>No users found</p>
-            </div>
-        `;
-        return;
-    }
-
-    chatsList.innerHTML = '';
-    
-    users.forEach(user => {
-        // Don't show current user in search results
-        const currentUser = authManager.getCurrentUser();
-        if (currentUser && user.id === currentUser.id) {
-            return; // Skip current user
+        const chatsList = document.getElementById('chats-list');
+        
+        if (users.length === 0) {
+            chatsList.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-search"></i>
+                    <p>No users found</p>
+                </div>
+            `;
+            return;
         }
 
-        const userElement = document.createElement('div');
-        userElement.className = 'chat-item search-result';
-        userElement.innerHTML = `
-            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(user.full_name)}&background=6366f1&color=fff" 
-                 alt="${user.full_name}" class="chat-avatar">
-            <div class="chat-info">
-                <div class="chat-header">
-                    <span class="chat-partner">${user.full_name}</span>
-                </div>
-                <div class="chat-last-message">@${user.username}</div>
-            </div>
-            <i class="fas fa-plus"></i>
-        `;
+        chatsList.innerHTML = '';
+        
+        users.forEach(user => {
+            const currentUser = authManager.getCurrentUser();
+            if (currentUser && user.id === currentUser.id) {
+                return;
+            }
 
-        userElement.addEventListener('click', async () => {
-            // Prevent multiple clicks
-            if (userElement.classList.contains('loading')) return;
-            
-            userElement.classList.add('loading');
-            await this.startChat(user.username);
-            userElement.classList.remove('loading');
-        });
+            const userElement = document.createElement('div');
+            userElement.className = 'chat-item search-result';
+            userElement.innerHTML = `
+                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(user.full_name)}&background=6366f1&color=fff" 
+                     alt="${user.full_name}" class="chat-avatar">
+                <div class="chat-info">
+                    <div class="chat-header">
+                        <span class="chat-partner">${user.full_name}</span>
+                    </div>
+                    <div class="chat-last-message">@${user.username}</div>
+                </div>
+                <i class="fas fa-plus"></i>
+            `;
+
+            userElement.addEventListener('click', async () => {
+                if (userElement.classList.contains('loading')) return;
+                
+                userElement.classList.add('loading');
+                await this.startChat(user.username);
+                userElement.classList.remove('loading');
+            });
 
             chatsList.appendChild(userElement);
         });
     }
 
     async startChat(username) {
-    // Input validation
-    if (!username || typeof username !== 'string') {
-        ui.showToast('Invalid username', 'error');
-        return;
-    }
-
-    const trimmedUsername = username.trim();
-    if (trimmedUsername.length < 3) {
-        ui.showToast('Username must be at least 3 characters', 'error');
-        return;
-    }
-
-    // Don't allow starting chat with yourself
-    const currentUser = authManager.getCurrentUser();
-    if (currentUser && currentUser.username === trimmedUsername) {
-        ui.showToast('Cannot start chat with yourself', 'warning');
-        return;
-    }
-
-    try {
-        ui.showLoading(true);
-        
-        const chat = await api.createOrGetChat(trimmedUsername);
-        
-        if (!chat || !chat.id) {
-            throw new Error('Invalid chat response from server');
+        if (!username || typeof username !== 'string') {
+            ui.showToast('Invalid username', 'error');
+            return;
         }
-        
-        await this.selectChat(chat);
-        
-        // Reload chats list to include new chat
-        await this.loadChats();
-        
-        ui.showToast(`Chat started with ${trimmedUsername}`, 'success');
-        
-    } catch (error) {
-        console.error('Start chat error:', error);
-        
-        // Specific error messages
-        if (error.message.includes('User not found')) {
-            ui.showToast('User not found', 'error');
-        } else if (error.message.includes('Cannot create chat with yourself')) {
+
+        const trimmedUsername = username.trim();
+        if (trimmedUsername.length < 3) {
+            ui.showToast('Username must be at least 3 characters', 'error');
+            return;
+        }
+
+        const currentUser = authManager.getCurrentUser();
+        if (currentUser && currentUser.username === trimmedUsername) {
             ui.showToast('Cannot start chat with yourself', 'warning');
-        } else if (error.message.includes('already exists')) {
-            // Chat already exists, just select it
-            await this.loadChats(); // Refresh list
-            ui.showToast('Chat already exists', 'info');
-        } else {
-            ui.showToast(error.message || 'Failed to start chat', 'error');
+            return;
         }
+
+        try {
+            ui.showLoading(true);
+            
+            const chat = await api.createOrGetChat(trimmedUsername);
+            
+            if (!chat || !chat.id) {
+                throw new Error('Invalid chat response from server');
+            }
+            
+            await this.selectChat(chat);
+            
+            await this.loadChats();
+            
+            ui.showToast(`Chat started with ${trimmedUsername}`, 'success');
+            
+        } catch (error) {
+            console.error('Start chat error:', error);
+            
+            if (error.message.includes('User not found')) {
+                ui.showToast('User not found', 'error');
+            } else if (error.message.includes('Cannot create chat with yourself')) {
+                ui.showToast('Cannot start chat with yourself', 'warning');
+            } else if (error.message.includes('already exists')) {
+                await this.loadChats();
+                ui.showToast('Chat already exists', 'info');
+            } else {
+                ui.showToast(error.message || 'Failed to start chat', 'error');
+            }
         } finally {
             ui.showLoading(false);
         }
@@ -441,10 +411,7 @@ class ChatManager {
 
     handleFileUploaded(file, chatId) {
         if (this.currentChat && this.currentChat.id === chatId) {
-            // Reload files list
             this.loadFiles(chatId);
-            
-            // Show notification
             ui.showToast(`New file: ${file.filename}`, 'success');
         }
     }
@@ -457,11 +424,14 @@ class ChatManager {
         document.getElementById('files-panel').classList.add('hidden');
     }
 
+    closeSearchResults() {
+        const userSearch = document.getElementById('user-search');
+        userSearch.value = '';
+        this.renderChatsList();
+    }
+
     markMessagesAsRead(messageIds = null) {
         if (!this.currentChat) return;
-
-        // If no specific message IDs provided, mark all unread messages in current chat as read
-        // This would require additional backend support
     }
 
     scrollToBottom() {
@@ -478,9 +448,9 @@ class ChatManager {
         const diffDays = Math.floor(diffMs / 86400000);
 
         if (diffMins < 1) return 'Just now';
-        if (diffMins < 60) return `${diffMins}m ago`;
-        if (diffHours < 24) return `${diffHours}h ago`;
-        if (diffDays < 7) return `${diffDays}d ago`;
+        if (diffMins < 60) return diffMins + 'm ago';
+        if (diffHours < 24) return diffHours + 'h ago';
+        if (diffDays < 7) return diffDays + 'd ago';
         
         return date.toLocaleDateString();
     }
@@ -503,5 +473,4 @@ class ChatManager {
     }
 }
 
-// Create global chat instance
 const chatManager = new ChatManager();

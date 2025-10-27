@@ -7,6 +7,12 @@ class API {
     }
 
     async request(endpoint, options = {}) {
+        // Don't make API calls if no token (except for auth endpoints)
+        if (!this.token && !endpoint.includes('/auth/')) {
+            console.log('Skipping API call - no authentication token');
+            throw new Error('Authentication required');
+        }
+
         const url = `${API_BASE_URL}${endpoint}`;
         const config = {
             headers: {
@@ -98,27 +104,15 @@ class API {
     }
 
     async createOrGetChat(recipientUsername) {
-    if (!recipientUsername || typeof recipientUsername !== 'string') {
-        throw new Error('Valid username is required');
-    }
-    
-    const encodedUsername = encodeURIComponent(recipientUsername.trim());
-    
-    try {
-        // First try query parameter format (your current backend)
-        return await this.request(`/chats/?recipient_username=${encodedUsername}`, {
+        if (!recipientUsername || typeof recipientUsername !== 'string') {
+            throw new Error('Valid username is required');
+        }
+        
+        const encodedUsername = encodeURIComponent(recipientUsername.trim());
+        
+        return this.request(`/chats/?recipient_username=${encodedUsername}`, {
             method: 'POST',
         });
-    } catch (error) {
-        // If query parameter fails, try JSON body format (backward compatibility)
-        if (error.message.includes('422') || error.message.includes('Unprocessable')) {
-            return await this.request('/chats/', {
-                method: 'POST',
-                body: JSON.stringify({ recipient_username: recipientUsername })
-            });
-        }
-        throw error; // Re-throw other errors
-        }
     }
 
     async getChatMessages(chatId) {
@@ -145,23 +139,33 @@ class API {
 
     // File endpoints
     async uploadFile(chatId, file) {
+        // Don't proceed if no token
+        if (!this.token) {
+            throw new Error('Authentication required');
+        }
+
         const formData = new FormData();
         formData.append('file', file);
 
-        const response = await fetch(`${API_BASE_URL}/chats/${chatId}/files`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${this.token}`,
-            },
-            body: formData,
-        });
+        try {
+            const response = await fetch(`${API_BASE_URL}/chats/${chatId}/files`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                },
+                body: formData,
+            });
 
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.detail || `Upload failed! status: ${response.status}`);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.detail || `Upload failed! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('File upload failed:', error);
+            throw error;
         }
-
-        return await response.json();
     }
 
     async getChatFiles(chatId) {
@@ -174,21 +178,19 @@ class API {
         });
     }
 
-    async checkBackendCompatibility() {
-    try {
-        // Test if query parameter format works
-        const testResponse = await this.request('/chats/?recipient_username=test', {
-            method: 'POST'
-        });
-        return true;
-        } catch (error) {
-            console.warn('Query parameter format not supported, falling back to JSON body');
-            return false;
-        }
-    }
-
     getFileUrl(filePath) {
         return `${API_BASE_URL}/files/${filePath}`;
+    }
+
+    // Utility method to check if user is authenticated
+    isAuthenticated() {
+        return !!this.token;
+    }
+
+    // Clear all stored data (for logout)
+    clearAuth() {
+        this.token = null;
+        localStorage.removeItem('chat_token');
     }
 }
 
